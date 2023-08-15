@@ -23,7 +23,7 @@
             <div class="column"> {{ todo.content }}</div>
             <div class="column is-5 has-text-right">
               <button class="button is-ligth">&check;</button>
-              <button class="button is-danger ml-2">&cross;</button>
+              <button @click="deleteToDo(todo.id)" class="button is-danger ml-2">&cross;</button>
             </div>
           </div>
 
@@ -42,11 +42,22 @@ import { v4 as uuidv4 } from "uuid";
 //todo
 
 const todos = ref([
+  {
+    id: 'id1',
+    content: 'some',
+    done: false,
+  },
+  {
+    id: 'id2',
+    content: 'some',
+    done: false,
+  }
 ]);
 
 //methods
 
 const newtodoContent = ref(""); // получает внутреннее значение, и вернет нам реактивный мутированный реф объект. внутри есть только одно свойство - value. 
+
 const addToDo = () => {
   const newToDo = {
     id: uuidv4(),
@@ -58,7 +69,15 @@ const addToDo = () => {
   newtodoContent.value = ''
   // console.log("addToDo");
 }
+
+//delete todo
+const deleteToDo = id =>{
+  console.log('deleteid', id);
+  todos.value = todos.value.filter(todo=>todo.id !== id)
+}
 </script>
+
+
 
 <style>
 @import "/node_modules/bulma/css/bulma.min.css";
