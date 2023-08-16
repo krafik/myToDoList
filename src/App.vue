@@ -37,8 +37,11 @@
 
 <script setup>
 //import
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { v4 as uuidv4 } from "uuid";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from './firebase/index.js'
+
 
 //todo
 
@@ -56,6 +59,33 @@ const todos = ref([
 ]);
 
 //methods
+/**
+ * get todos
+ */
+// onMounted( async function () {
+//   const querySnapshot = await getDocs(collection(db, "cities"));
+//   querySnapshot.forEach((doc) => {
+//     // doc.data() is never undefined for query doc snapshots
+//     console.log(doc.id, " => ", doc.data());
+//   });
+// })
+
+onMounted(async () => {
+  const querySnapshot  =  await getDocs(collection(db, "todos"));
+  let fbTodos=[];
+  querySnapshot.forEach((doc) => {
+    // doc.data() is never undefined for query doc snapshots
+    console.log(doc.id, " => ", doc.data());
+    const todo={
+      id:doc.id,
+      content:doc.data().content,
+      done: doc.data().done,
+    }
+    fbTodos.push(todo);
+  });
+  todos.value = fbTodos;
+})
+
 
 const newtodoContent = ref(""); // получает внутреннее значение, и вернет нам реактивный мутированный реф объект. внутри есть только одно свойство - value. 
 
@@ -79,7 +109,7 @@ const deleteToDo = id => {
 
 //togglerDone
 const togglerDone = id => {
-  const index = todos.value.findIndex(todo=> todo.id === id);
+  const index = todos.value.findIndex(todo => todo.id === id);
   console.log(index);
   todos.value[index].done = !todos.value[index].done
 }
