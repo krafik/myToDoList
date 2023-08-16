@@ -38,10 +38,10 @@
 <script setup>
 //import
 import { ref, onMounted } from "vue";
-import { v4 as uuidv4 } from "uuid";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, addDoc, doc, deleteDoc, updateDoc } from "firebase/firestore";
 import { db } from './firebase/index.js'
 
+const todosCollectionRef = collection(db, "todos")
 
 //todo
 
@@ -62,31 +62,9 @@ const todos = ref([
 /**
  * get todos
  */
-// onMounted( async function () {
-//   const querySnapshot = await getDocs(collection(db, "cities"));
-//   querySnapshot.forEach((doc) => {
-//     // doc.data() is never undefined for query doc snapshots
-//     console.log(doc.id, " => ", doc.data());
-//   });
-// })
 
 onMounted(() => {
-  // const querySnapshot  =  await getDocs(collection(db, "todos"));
-  // let fbTodos=[];
-  // querySnapshot.forEach((doc) => {
-  //   // doc.data() is never undefined for query doc snapshots
-  //   console.log(doc.id, " => ", doc.data());
-  //   const todo={
-  //     id:doc.id,
-  //     content:doc.data().content,
-  //     done: doc.data().done,
-  //   }
-  //   fbTodos.push(todo);
-  // });
-  // todos.value = fbTodos;
-
-
-  onSnapshot(collection(db, "todos"), (querySnapshot) => {
+  onSnapshot(todosCollectionRef, (querySnapshot) => {
     const fbTodos = [];
     querySnapshot.forEach((doc) => {
       const todo = {
@@ -94,41 +72,42 @@ onMounted(() => {
         content: doc.data().content,
         done: doc.data().done,
       };
-       fbTodos.push(todo);
+      fbTodos.push(todo);
     });
     todos.value = fbTodos;
     // console.log("Current cities in CA: ", fbTodos.join(", "));
   });
-
 })
 
 
 const newtodoContent = ref(""); // получает внутреннее значение, и вернет нам реактивный мутированный реф объект. внутри есть только одно свойство - value. 
 
 const addToDo = () => {
-  const newToDo = {
-    id: uuidv4(),
+  addDoc(todosCollectionRef, {
     content: newtodoContent.value,
-    done: false,
-  }
-  // console.log('log ', newToDo);
-  todos.value.unshift(newToDo);
-  newtodoContent.value = ''
+    done: false
+  });
+  newtodoContent.value = '';
   // console.log("addToDo");
 }
 
 //delete todo
 const deleteToDo = id => {
   console.log('deleteid', id);
-  todos.value = todos.value.filter(todo => todo.id !== id)
+  deleteDoc(doc(todosCollectionRef, id));
+  // todos.value = todos.value.filter(todo => todo.id !== id)
 }
 
 //togglerDone
 const togglerDone = id => {
   const index = todos.value.findIndex(todo => todo.id === id);
   console.log(index);
-  todos.value[index].done = !todos.value[index].done
+  updateDoc(doc(todosCollectionRef, id), {
+    done: !todos.value[index].done,
+  });
+  // todos.value[index].done = !todos.value[index].done
 }
+
 </script>
 
 
